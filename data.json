@@ -2,7 +2,7 @@
   "materials": [
     {
       "id": "M001",
-      "name": "Bergamot Essential Oil",
+      "name": "Begamont eo",
       "casNumber": "8007-75-8",
       "category": "Citrus",
       "scentProfile": "Fresh, Citrus, Sweet",
@@ -52,7 +52,7 @@
   "formulas": [
     {
       "id": "F001",
-      "name": "Fresh Citrus Cologne",
+      "name": "Formula 1",
       "type": "Eau de Cologne",
       "status": "Active",
       "ingredients": [
@@ -64,40 +64,9 @@
           "materialId": "M002",
           "weight": 15
         }
-      ]
-    },
-    {
-      "name": "Rose 12",
-      "createdDate": "2026-02-09",
-      "ingredients": [
-        {
-          "materialId": "M002",
-          "materialName": "Hedione",
-          "amount": "1",
-          "dilution": "0.2"
-        },
-        {
-          "materialId": "M001",
-          "materialName": "Bergamot Essential Oil",
-          "amount": "0.04",
-          "dilution": "1"
-        }
       ],
-      "id": "F002"
-    },
-    {
-      "name": "aefgadf",
-      "createdDate": "2026-02-09",
-      "ingredients": [
-        {
-          "materialId": "M002",
-          "materialName": "Hedione",
-          "amount": "6",
-          "dilution": "0.8"
-        }
-      ],
-      "id": "F003"
+      "createdDate": "2026-02-08"
     }
   ],
-  "exportDate": "2026-02-09T06:18:56.909Z"
+  "exportDate": "2026-02-09T06:36:48.183Z"
 }
