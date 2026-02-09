@@ -1,0 +1,103 @@
+{
+  "materials": [
+    {
+      "id": "M001",
+      "name": "Bergamot Essential Oil",
+      "casNumber": "8007-75-8",
+      "category": "Citrus",
+      "scentProfile": "Fresh, Citrus, Sweet",
+      "position": "Top",
+      "allergen": "Yes - Limonene, Linalool",
+      "type": "Natural",
+      "strength": 7,
+      "substantivity": "Low"
+    },
+    {
+      "id": "M002",
+      "name": "Hedione",
+      "casNumber": "24851-98-7",
+      "category": "Floral",
+      "scentProfile": "Jasmine, Green, Fresh",
+      "position": "Heart",
+      "allergen": "No",
+      "type": "Aromachemical",
+      "strength": 5,
+      "substantivity": "Medium"
+    },
+    {
+      "id": "M003",
+      "name": "Sandalwood Oil (Australian)",
+      "casNumber": "8006-87-9",
+      "category": "Woody",
+      "scentProfile": "Creamy, Woody, Soft",
+      "position": "Base",
+      "allergen": "Yes - Santalol",
+      "type": "Natural",
+      "strength": 9,
+      "substantivity": "High"
+    },
+    {
+      "name": "ISO -aa sf",
+      "casNumber": "23r",
+      "category": "13r",
+      "scentProfile": "fasdf",
+      "position": "Base",
+      "allergen": "asdf",
+      "type": "Natural",
+      "strength": 5,
+      "substantivity": "High",
+      "id": "M004"
+    }
+  ],
+  "formulas": [
+    {
+      "id": "F001",
+      "name": "Fresh Citrus Cologne",
+      "type": "Eau de Cologne",
+      "status": "Active",
+      "ingredients": [
+        {
+          "materialId": "M001",
+          "weight": 30
+        },
+        {
+          "materialId": "M002",
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "name": "Rose 12",
+      "createdDate": "2026-02-09",
+      "ingredients": [
+        {
+          "materialId": "M002",
+          "materialName": "Hedione",
+          "amount": "1",
+          "dilution": "0.2"
+        },
+        {
+          "materialId": "M001",
+          "materialName": "Bergamot Essential Oil",
+          "amount": "0.04",
+          "dilution": "1"
+        }
+      ],
+      "id": "F002"
+    },
+    {
+      "name": "aefgadf",
+      "createdDate": "2026-02-09",
+      "ingredients": [
+        {
+          "materialId": "M002",
+          "materialName": "Hedione",
+          "amount": "6",
+          "dilution": "0.8"
+        }
+      ],
+      "id": "F003"
+    }
+  ],
+  "exportDate": "2026-02-09T06:18:56.909Z"
+}

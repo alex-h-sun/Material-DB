@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fragrance Formula Database</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c5f4f;
+            --primary-light: #3d7a65;
+            --primary-dark: #1d4438;
+            --accent: #d4af37;
+            --accent-light: #e8c966;
+            --bg-main: #fdfbf7;
+            --bg-card: #ffffff;
+            --text-dark: #2d2d2d;
+            --text-mid: #5a5a5a;
+            --text-light: #8a8a8a;
+            --border: #e8e4dc;
+            --shadow: rgba(44, 95, 79, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(135deg, #fdfbf7 0%, #f5f1e8 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-mid);
+            font-weight: 300;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-mid);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            width: 100%;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--bg-card);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 95, 79, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Lato', sans-serif;
+        }
+
+        select.btn {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c5f4f' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        select.btn-secondary {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c5f4f' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: var(--text-dark);
+        }
+
+        .btn-accent:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-mid);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .card-actions button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-natural {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-synthetic {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-top {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-heart {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-base {
+            background: #d6d8db;
+            color: #383d41;
+        }
+
+        .material-detail {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+            color: var(--text-mid);
+        }
+
+        .material-detail strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .strength-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s ease;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 2rem;
+            color: var(--primary-dark);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Lato', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 95, 79, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 2px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--primary-dark);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        tr:hover {
+            background: rgba(44, 95, 79, 0.03);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--text-mid);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const defaultMaterials = [
+            {
+                id: 'M001',
+                name: 'Bergamot Essential Oil',
+                casNumber: '8007-75-8',
+                category: 'Citrus',
+                scentProfile: 'Fresh, Citrus, Sweet',
+                position: 'Top',
+                allergen: 'Yes - Limonene, Linalool',
+                type: 'Natural',
+                strength: 7,
+                substantivity: 'Low'
+            },
+            {
+                id: 'M002',
+                name: 'Hedione',
+                casNumber: '24851-98-7',
+                category: 'Floral',
+                scentProfile: 'Jasmine, Green, Fresh',
+                position: 'Heart',
+                allergen: 'No',
+                type: 'Aromachemical',
+                strength: 5,
+                substantivity: 'Medium'
+            },
+            {
+                id: 'M003',
+                name: 'Sandalwood Oil (Australian)',
+                casNumber: '8006-87-9',
+                category: 'Woody',
+                scentProfile: 'Creamy, Woody, Soft',
+                position: 'Base',
+                allergen: 'Yes - Santalol',
+                type: 'Natural',
+                strength: 9,
+                substantivity: 'High'
+            }
+        ];
+
+        const defaultFormulas = [
+            {
+                id: 'F001',
+                name: 'Fresh Citrus Cologne',
+                createdDate: '2024-01-15',
+                ingredients: [
+                    { materialId: 'M001', materialName: 'Bergamot Essential Oil', amount: '30', dilution: '10' },
+                    { materialId: 'M002', materialName: 'Hedione', amount: '15', dilution: '20' }
+                ]
+            }
+        ];
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('materials');
+            const [materials, setMaterials] = useState([]);
+            const [formulas, setFormulas] = useState([]);
+            const [showMaterialModal, setShowMaterialModal] = useState(false);
+            const [showFormulaModal, setShowFormulaModal] = useState(false);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [editingMaterial, setEditingMaterial] = useState(null);
+            const [successMessage, setSuccessMessage] = useState('');
+            const [sortBy, setSortBy] = useState('all');
+            const [filterValue, setFilterValue] = useState('all');
+            const [editingFormula, setEditingFormula] = useState(null);
+
+            const [formulaForm, setFormulaForm] = useState({
+                name: '',
+                createdDate: new Date().toISOString().split('T')[0],
+                ingredients: []
+            });
+
+            const [materialForm, setMaterialForm] = useState({
+                name: '',
+                casNumber: '',
+                category: '',
+                scentProfile: '',
+                position: 'Top',
+                allergen: '',
+                type: 'Natural',
+                strength: 5,
+                substantivity: 'Medium'
+            });
+
+            // Load data from localStorage on mount
+            useEffect(() => {
+                const savedMaterials = localStorage.getItem('fragranceMaterials');
+                const savedFormulas = localStorage.getItem('fragranceFormulas');
+                
+                if (savedMaterials) {
+                    setMaterials(JSON.parse(savedMaterials));
+                } else {
+                    // Load default materials if nothing in localStorage
+                    setMaterials(defaultMaterials);
+                    localStorage.setItem('fragranceMaterials', JSON.stringify(defaultMaterials));
+                }
+
+                if (savedFormulas) {
+                    setFormulas(JSON.parse(savedFormulas));
+                } else {
+                    setFormulas(defaultFormulas);
+                    localStorage.setItem('fragranceFormulas', JSON.stringify(defaultFormulas));
+                }
+            }, []);
+
+            // Save to localStorage whenever materials change
+            useEffect(() => {
+                if (materials.length > 0) {
+                    localStorage.setItem('fragranceMaterials', JSON.stringify(materials));
+                }
+            }, [materials]);
+
+            // Save to localStorage whenever formulas change
+            useEffect(() => {
+                if (formulas.length > 0) {
+                    localStorage.setItem('fragranceFormulas', JSON.stringify(formulas));
+                }
+            }, [formulas]);
+
+            const showSuccess = (message) => {
+                setSuccessMessage(message);
+                setTimeout(() => setSuccessMessage(''), 3000);
+            };
+
+            // Get unique values for dropdowns
+            const uniqueCategories = [...new Set(materials.map(m => m.category))].sort();
+            const uniqueScentProfiles = [...new Set(materials.map(m => m.scentProfile))].sort();
+
+            // Reset filter value when sort type changes
+            const handleSortChange = (newSortBy) => {
+                setSortBy(newSortBy);
+                setFilterValue('all');
+            };
+
+            const filteredMaterials = materials
+                .filter(m => {
+                    // Search filter
+                    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        m.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        m.scentProfile.toLowerCase().includes(searchTerm.toLowerCase());
+                    
+                    if (!matchesSearch) return false;
+
+                    // Sort/Filter logic
+                    if (sortBy === 'all' || filterValue === 'all') return true;
+                    
+                    if (sortBy === 'type') return m.type === filterValue;
+                    if (sortBy === 'position') return m.position === filterValue;
+                    if (sortBy === 'category') return m.category === filterValue;
+                    if (sortBy === 'scentProfile') return m.scentProfile === filterValue;
+                    
+                    return true;
+                });
+
+            const openMaterialModal = (material = null) => {
+                if (material) {
+                    setEditingMaterial(material);
+                    setMaterialForm(material);
+                } else {
+                    setEditingMaterial(null);
+                    setMaterialForm({
+                        name: '',
+                        casNumber: '',
+                        category: '',
+                        scentProfile: '',
+                        position: 'Top',
+                        allergen: '',
+                        type: 'Natural',
+                        strength: 5,
+                        substantivity: 'Medium'
+                    });
+                }
+                setShowMaterialModal(true);
+            };
+
+            const saveMaterial = () => {
+                if (!materialForm.name || !materialForm.category || !materialForm.scentProfile) {
+                    alert('Please fill in all required fields (Name, Category, Scent Profile)');
+                    return;
+                }
+
+                if (editingMaterial) {
+                    setMaterials(materials.map(m => 
+                        m.id === editingMaterial.id ? { ...materialForm, id: m.id } : m
+                    ));
+                    showSuccess('Material updated successfully!');
+                } else {
+                    const newId = 'M' + String(materials.length + 1).padStart(3, '0');
+                    setMaterials([...materials, { ...materialForm, id: newId }]);
+                    showSuccess('Material added successfully!');
+                }
+                setShowMaterialModal(false);
+            };
+
+            const deleteMaterial = (id) => {
+                if (confirm('Are you sure you want to delete this material?')) {
+                    setMaterials(materials.filter(m => m.id !== id));
+                    showSuccess('Material deleted successfully!');
+                }
+            };
+
+            const exportDatabase = () => {
+                const data = {
+                    materials,
+                    formulas,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `fragrance-database-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showSuccess('Database exported successfully!');
+            };
+
+            const importDatabase = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.materials) {
+                            setMaterials(data.materials);
+                            localStorage.setItem('fragranceMaterials', JSON.stringify(data.materials));
+                        }
+                        if (data.formulas) {
+                            setFormulas(data.formulas);
+                            localStorage.setItem('fragranceFormulas', JSON.stringify(data.formulas));
+                        }
+                        showSuccess('Database imported successfully!');
+                    } catch (error) {
+                        alert('Error importing database. Please check the file format.');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            };
+
+            const triggerImport = () => {
+                document.getElementById('file-import-input').click();
+            };
+
+            const openFormulaModal = (formula = null) => {
+                if (formula) {
+                    setEditingFormula(formula);
+                    setFormulaForm(formula);
+                } else {
+                    setEditingFormula(null);
+                    setFormulaForm({
+                        name: '',
+                        createdDate: new Date().toISOString().split('T')[0],
+                        ingredients: []
+                    });
+                }
+                setShowFormulaModal(true);
+            };
+
+            const saveFormula = () => {
+                if (!formulaForm.name) {
+                    alert('Please enter a formula name');
+                    return;
+                }
+
+                if (formulaForm.ingredients.length === 0) {
+                    alert('Please add at least one ingredient');
+                    return;
+                }
+
+                if (editingFormula) {
+                    setFormulas(formulas.map(f => 
+                        f.id === editingFormula.id ? { ...formulaForm, id: f.id } : f
+                    ));
+                    showSuccess('Formula updated successfully!');
+                } else {
+                    const newId = 'F' + String(formulas.length + 1).padStart(3, '0');
+                    setFormulas([...formulas, { ...formulaForm, id: newId }]);
+                    showSuccess('Formula added successfully!');
+                }
+                setShowFormulaModal(false);
+            };
+
+            const deleteFormula = (id) => {
+                if (confirm('Are you sure you want to delete this formula?')) {
+                    setFormulas(formulas.filter(f => f.id !== id));
+                    showSuccess('Formula deleted successfully!');
+                }
+            };
+
+            const addIngredient = () => {
+                setFormulaForm({
+                    ...formulaForm,
+                    ingredients: [...formulaForm.ingredients, { materialId: '', materialName: '', amount: '', dilution: '' }]
+                });
+            };
+
+            const updateIngredient = (index, field, value) => {
+                const updatedIngredients = [...formulaForm.ingredients];
+                updatedIngredients[index][field] = value;
+                
+                // Auto-populate material name when material ID is selected
+                if (field === 'materialId') {
+                    const material = materials.find(m => m.id === value);
+                    if (material) {
+                        updatedIngredients[index].materialName = material.name;
+                    }
+                }
+                
+                setFormulaForm({
+                    ...formulaForm,
+                    ingredients: updatedIngredients
+                });
+            };
+
+            const removeIngredient = (index) => {
+                setFormulaForm({
+                    ...formulaForm,
+                    ingredients: formulaForm.ingredients.filter((_, i) => i !== index)
+                });
+            };
+
+            const clearDatabase = () => {
+                if (confirm('Are you sure you want to clear all data? This will remove all materials and formulas. Make sure to export your data first!')) {
+                    setMaterials([]);
+                    setFormulas([]);
+                    localStorage.removeItem('fragranceMaterials');
+                    localStorage.removeItem('fragranceFormulas');
+                    showSuccess('Database cleared successfully!');
+                }
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>Fragrance Formula Database</h1>
+                        <p>Natural & Aromachemical Material Library</p>
+                    </div>
+
+                    {successMessage && (
+                        <div className="success-message">
+                            ✓ {successMessage}
+                        </div>
+                    )}
+
+                    <div className="tabs">
+                        <button 
+                            className={`tab ${activeTab === 'materials' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('materials')}
+                        >
+                            Materials Library
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'formulas' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('formulas')}
+                        >
+                            Formulas
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'calculator' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('calculator')}
+                        >
+                            Cost Calculator
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'compliance' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('compliance')}
+                        >
+                            IFRA Compliance
+                        </button>
+                    </div>
+
+                    {activeTab === 'materials' && (
+                        <>
+                            <div className="action-bar">
+                                <div className="search-box">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search materials by name, category, or scent..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="action-buttons">
+                                    <div style={{display: 'flex', gap: '0.75rem', alignItems: 'center'}}>
+                                        <select 
+                                            className="btn btn-secondary" 
+                                            value={sortBy}
+                                            onChange={(e) => handleSortChange(e.target.value)}
+                                            style={{cursor: 'pointer'}}
+                                        >
+                                            <option value="all">All Materials</option>
+                                            <option value="type">Sort by Natural/Synthetic</option>
+                                            <option value="position">Sort by Top/Heart/Base</option>
+                                            <option value="category">Sort by Category</option>
+                                            <option value="scentProfile">Sort by Scent Profile</option>
+                                        </select>
+
+                                        {sortBy === 'type' && (
+                                            <select 
+                                                className="btn btn-secondary"
+                                                value={filterValue}
+                                                onChange={(e) => setFilterValue(e.target.value)}
+                                                style={{cursor: 'pointer'}}
+                                            >
+                                                <option value="all">All Types</option>
+                                                <option value="Natural">Natural</option>
+                                                <option value="Aromachemical">Aromachemical</option>
+                                            </select>
+                                        )}
+
+                                        {sortBy === 'position' && (
+                                            <select 
+                                                className="btn btn-secondary"
+                                                value={filterValue}
+                                                onChange={(e) => setFilterValue(e.target.value)}
+                                                style={{cursor: 'pointer'}}
+                                            >
+                                                <option value="all">All Positions</option>
+                                                <option value="Top">Top Note</option>
+                                                <option value="Heart">Heart Note</option>
+                                                <option value="Base">Base Note</option>
+                                            </select>
+                                        )}
+
+                                        {sortBy === 'category' && (
+                                            <select 
+                                                className="btn btn-secondary"
+                                                value={filterValue}
+                                                onChange={(e) => setFilterValue(e.target.value)}
+                                                style={{cursor: 'pointer'}}
+                                            >
+                                                <option value="all">All Categories</option>
+                                                {uniqueCategories.map(cat => (
+                                                    <option key={cat} value={cat}>{cat}</option>
+                                                ))}
+                                            </select>
+                                        )}
+
+                                        {sortBy === 'scentProfile' && (
+                                            <select 
+                                                className="btn btn-secondary"
+                                                value={filterValue}
+                                                onChange={(e) => setFilterValue(e.target.value)}
+                                                style={{cursor: 'pointer'}}
+                                            >
+                                                <option value="all">All Scent Profiles</option>
+                                                {uniqueScentProfiles.map(profile => (
+                                                    <option key={profile} value={profile}>{profile}</option>
+                                                ))}
+                                            </select>
+                                        )}
+                                    </div>
+                                    <button className="btn btn-accent" onClick={exportDatabase}>
+                                        ↓ Export Database
+                                    </button>
+                                    <button className="btn btn-accent" onClick={triggerImport}>
+                                        ↑ Import Database
+                                    </button>
+                                    <input 
+                                        id="file-import-input"
+                                        type="file" 
+                                        accept=".json"
+                                        onChange={importDatabase}
+                                        style={{display: 'none'}}
+                                    />
+                                    <button className="btn btn-primary" onClick={() => openMaterialModal()}>
+                                        + Add Material
+                                    </button>
+                                </div>
+                            </div>
+
+                            {filteredMaterials.length === 0 ? (
+                                <div className="empty-state">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    <h3>No materials found</h3>
+                                    <p>Start by adding your first material to the database</p>
+                                </div>
+                            ) : (
+                                <div className="grid">
+                                    {filteredMaterials.map(material => (
+                                        <MaterialCard 
+                                            key={material.id} 
+                                            material={material}
+                                            onEdit={() => openMaterialModal(material)}
+                                            onDelete={() => deleteMaterial(material.id)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'formulas' && (
+                        <>
+                            <div className="action-bar">
+                                <div className="search-box">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search formulas by name..."
+                                        disabled
+                                    />
+                                </div>
+                                <div className="action-buttons">
+                                    <button className="btn btn-accent" onClick={exportDatabase}>
+                                        ↓ Export Database
+                                    </button>
+                                    <button className="btn btn-accent" onClick={triggerImport}>
+                                        ↑ Import Database
+                                    </button>
+                                    <input 
+                                        id="file-import-input-formulas"
+                                        type="file" 
+                                        accept=".json"
+                                        onChange={importDatabase}
+                                        style={{display: 'none'}}
+                                    />
+                                    <button className="btn btn-primary" onClick={() => openFormulaModal()}>
+                                        + Add Formula
+                                    </button>
+                                </div>
+                            </div>
+
+                            {formulas.length === 0 ? (
+                                <div className="empty-state">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <h3>No formulas found</h3>
+                                    <p>Start by creating your first fragrance formula</p>
+                                </div>
+                            ) : (
+                                <div className="grid">
+                                    {formulas.map(formula => (
+                                        <FormulaCard 
+                                            key={formula.id} 
+                                            formula={formula}
+                                            materials={materials}
+                                            onEdit={() => openFormulaModal(formula)}
+                                            onDelete={() => deleteFormula(formula.id)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'calculator' && (
+                        <div className="empty-state">
+                            <h3>Cost Calculator</h3>
+                            <p>Select a formula to calculate material costs</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'compliance' && (
+                        <div className="empty-state">
+                            <h3>IFRA Compliance Checker</h3>
+                            <p>Verify your formulas meet IFRA safety standards</p>
+                        </div>
+                    )}
+
+                    {showMaterialModal && (
+                        <MaterialModal
+                            material={materialForm}
+                            onChange={setMaterialForm}
+                            onSave={saveMaterial}
+                            onClose={() => setShowMaterialModal(false)}
+                            isEditing={!!editingMaterial}
+                        />
+                    )}
+
+                    {showFormulaModal && (
+                        <FormulaModal
+                            formula={formulaForm}
+                            onChange={setFormulaForm}
+                            onSave={saveFormula}
+                            onClose={() => setShowFormulaModal(false)}
+                            isEditing={!!editingFormula}
+                            materials={materials}
+                            addIngredient={addIngredient}
+                            updateIngredient={updateIngredient}
+                            removeIngredient={removeIngredient}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        function MaterialCard({ material, onEdit, onDelete }) {
+            const getPositionBadge = (pos) => {
+                const classes = {
+                    'Top': 'badge-top',
+                    'Heart': 'badge-heart',
+                    'Base': 'badge-base'
+                };
+                return `badge ${classes[pos] || 'badge-top'}`;
+            };
+
+            const getTypeBadge = (type) => {
+                return type === 'Natural' ? 'badge-natural' : 'badge-synthetic';
+            };
+
+            return (
+                <div className="card">
+                    <div className="card-header">
+                        <div>
+                            <div className="card-title">{material.name}</div>
+                            <div className="card-subtitle">{material.id} • CAS {material.casNumber}</div>
+                        </div>
+                        <div className="card-actions">
+                            <button className="btn btn-small btn-secondary" onClick={onEdit}>Edit</button>
+                            <button className="btn btn-small btn-secondary" onClick={onDelete}>×</button>
+                        </div>
+                    </div>
+
+                    <div style={{marginBottom: '1rem'}}>
+                        <span className={getTypeBadge(material.type)}>{material.type}</span>
+                        {' '}
+                        <span className={getPositionBadge(material.position)}>{material.position} Note</span>
+                    </div>
+
+                    <div className="material-detail">
+                        <strong>Category:</strong> {material.category}
+                    </div>
+                    <div className="material-detail">
+                        <strong>Scent Profile:</strong> {material.scentProfile}
+                    </div>
+                    <div className="material-detail">
+                        <strong>Allergen:</strong> {material.allergen}
+                    </div>
+                    <div className="material-detail">
+                        <strong>Strength:</strong> {material.strength}/10
+                        <div className="strength-bar">
+                            <div className="strength-fill" style={{width: `${material.strength * 10}%`}}></div>
+                        </div>
+                    </div>
+                    <div className="material-detail">
+                        <strong>Substantivity:</strong> {material.substantivity}
+                    </div>
+                </div>
+            );
+        }
+
+        function MaterialModal({ material, onChange, onSave, onClose, isEditing }) {
+            const handleChange = (field, value) => {
+                onChange({ ...material, [field]: value });
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>{isEditing ? 'Edit Material' : 'Add New Material'}</h2>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-group">
+                                <label>Material Name *</label>
+                                <input 
+                                    type="text" 
+                                    value={material.name}
+                                    onChange={(e) => handleChange('name', e.target.value)}
+                                    placeholder="e.g., Bergamot Essential Oil"
+                                />
+                            </div>
+
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>CAS Number</label>
+                                    <input 
+                                        type="text" 
+                                        value={material.casNumber}
+                                        onChange={(e) => handleChange('casNumber', e.target.value)}
+                                        placeholder="e.g., 8007-75-8"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Category *</label>
+                                    <input 
+                                        type="text" 
+                                        value={material.category}
+                                        onChange={(e) => handleChange('category', e.target.value)}
+                                        placeholder="e.g., Citrus, Floral, Woody"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Scent Profile *</label>
+                                <input 
+                                    type="text" 
+                                    value={material.scentProfile}
+                                    onChange={(e) => handleChange('scentProfile', e.target.value)}
+                                    placeholder="e.g., Fresh, Citrus, Sweet"
+                                />
+                            </div>
+
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Top/Heart/Base *</label>
+                                    <select 
+                                        value={material.position}
+                                        onChange={(e) => handleChange('position', e.target.value)}
+                                    >
+                                        <option value="Top">Top Note</option>
+                                        <option value="Heart">Heart Note</option>
+                                        <option value="Base">Base Note</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Natural/Synthetic *</label>
+                                    <select 
+                                        value={material.type}
+                                        onChange={(e) => handleChange('type', e.target.value)}
+                                    >
+                                        <option value="Natural">Natural</option>
+                                        <option value="Aromachemical">Aromachemical</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Allergen Information</label>
+                                <input 
+                                    type="text" 
+                                    value={material.allergen}
+                                    onChange={(e) => handleChange('allergen', e.target.value)}
+                                    placeholder="e.g., Yes - Limonene, Linalool"
+                                />
+                            </div>
+
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Strength (1-10) *</label>
+                                    <input 
+                                        type="number" 
+                                        min="1" 
+                                        max="10"
+                                        value={material.strength}
+                                        onChange={(e) => handleChange('strength', parseInt(e.target.value))}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Substantivity *</label>
+                                    <select 
+                                        value={material.substantivity}
+                                        onChange={(e) => handleChange('substantivity', e.target.value)}
+                                    >
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Very High">Very High</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                            <button className="btn btn-primary" onClick={onSave}>
+                                {isEditing ? 'Update Material' : 'Add Material'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function FormulaCard({ formula, materials, onEdit, onDelete }) {
+            const totalAmount = formula.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.amount) || 0), 0);
+
+            return (
+                <div className="card">
+                    <div className="card-header">
+                        <div>
+                            <div className="card-title">{formula.name}</div>
+                            <div className="card-subtitle">{formula.id} • Created {formula.createdDate}</div>
+                        </div>
+                        <div className="card-actions">
+                            <button className="btn btn-small btn-secondary" onClick={onEdit}>Edit</button>
+                            <button className="btn btn-small btn-secondary" onClick={onDelete}>×</button>
+                        </div>
+                    </div>
+
+                    <div className="material-detail">
+                        <strong>Total Weight:</strong> {totalAmount.toFixed(2)}g
+                    </div>
+                    <div className="material-detail">
+                        <strong>Ingredients:</strong> {formula.ingredients.length} materials
+                    </div>
+
+                    <div style={{marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem'}}>
+                        {formula.ingredients.slice(0, 3).map((ing, idx) => {
+                            const material = materials.find(m => m.id === ing.materialId);
+                            return (
+                                <div key={idx} style={{fontSize: '0.9rem', color: 'var(--text-mid)', marginBottom: '0.25rem'}}>
+                                    • {material?.name || ing.materialName || 'Unknown'} - {ing.amount}g
+                                    {ing.dilution && ` (${ing.dilution}% dilution)`}
+                                </div>
+                            );
+                        })}
+                        {formula.ingredients.length > 3 && (
+                            <div style={{fontSize: '0.9rem', color: 'var(--text-light)', fontStyle: 'italic'}}>
+                                +{formula.ingredients.length - 3} more...
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function FormulaModal({ formula, onChange, onSave, onClose, isEditing, materials, addIngredient, updateIngredient, removeIngredient }) {
+            const handleChange = (field, value) => {
+                onChange({ ...formula, [field]: value });
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '800px'}}>
+                        <div className="modal-header">
+                            <h2>{isEditing ? 'Edit Formula' : 'Create New Formula'}</h2>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Formula Name *</label>
+                                    <input 
+                                        type="text" 
+                                        value={formula.name}
+                                        onChange={(e) => handleChange('name', e.target.value)}
+                                        placeholder="e.g., Fresh Citrus Cologne"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Date of Creation</label>
+                                    <input 
+                                        type="date" 
+                                        value={formula.createdDate}
+                                        onChange={(e) => handleChange('createdDate', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                    <span>Ingredients</span>
+                                    <button 
+                                        type="button"
+                                        className="btn btn-small btn-accent" 
+                                        onClick={addIngredient}
+                                    >
+                                        + Add Ingredient
+                                    </button>
+                                </label>
+
+                                {formula.ingredients.length === 0 ? (
+                                    <div style={{textAlign: 'center', padding: '2rem', color: 'var(--text-light)', border: '2px dashed var(--border)', borderRadius: '8px'}}>
+                                        No ingredients added yet. Click "Add Ingredient" to start.
+                                    </div>
+                                ) : (
+                                    <div style={{overflowX: 'auto'}}>
+                                        <table style={{width: '100%', marginTop: '0.5rem'}}>
+                                            <thead>
+                                                <tr style={{background: 'var(--bg-main)'}}>
+                                                    <th style={{padding: '0.75rem', textAlign: 'left', background: 'var(--bg-main)', color: 'var(--text-dark)', fontWeight: '600', borderRadius: '4px 0 0 0'}}>Material</th>
+                                                    <th style={{padding: '0.75rem', textAlign: 'left', background: 'var(--bg-main)', color: 'var(--text-dark)', fontWeight: '600'}}>Amount (g)</th>
+                                                    <th style={{padding: '0.75rem', textAlign: 'left', background: 'var(--bg-main)', color: 'var(--text-dark)', fontWeight: '600'}}>Dilution (%)</th>
+                                                    <th style={{padding: '0.75rem', textAlign: 'center', background: 'var(--bg-main)', color: 'var(--text-dark)', fontWeight: '600', borderRadius: '0 4px 0 0'}}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {formula.ingredients.map((ingredient, index) => (
+                                                    <tr key={index}>
+                                                        <td style={{padding: '0.5rem'}}>
+                                                            <select
+                                                                value={ingredient.materialId}
+                                                                onChange={(e) => updateIngredient(index, 'materialId', e.target.value)}
+                                                                style={{width: '100%', padding: '0.5rem', border: '2px solid var(--border)', borderRadius: '4px'}}
+                                                            >
+                                                                <option value="">Select material...</option>
+                                                                {materials.map(material => (
+                                                                    <option key={material.id} value={material.id}>
+                                                                        {material.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </td>
+                                                        <td style={{padding: '0.5rem'}}>
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                value={ingredient.amount}
+                                                                onChange={(e) => updateIngredient(index, 'amount', e.target.value)}
+                                                                placeholder="0.00"
+                                                                style={{width: '100%', padding: '0.5rem', border: '2px solid var(--border)', borderRadius: '4px'}}
+                                                            />
+                                                        </td>
+                                                        <td style={{padding: '0.5rem'}}>
+                                                            <input
+                                                                type="number"
+                                                                step="1"
+                                                                value={ingredient.dilution}
+                                                                onChange={(e) => updateIngredient(index, 'dilution', e.target.value)}
+                                                                placeholder="100"
+                                                                style={{width: '100%', padding: '0.5rem', border: '2px solid var(--border)', borderRadius: '4px'}}
+                                                            />
+                                                        </td>
+                                                        <td style={{padding: '0.5rem', textAlign: 'center'}}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeIngredient(index)}
+                                                                className="btn btn-small btn-secondary"
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        <div style={{marginTop: '1rem', padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '4px', fontWeight: '600'}}>
+                                            Total: {formula.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.amount) || 0), 0).toFixed(2)}g
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                            <button className="btn btn-primary" onClick={onSave}>
+                                {isEditing ? 'Update Formula' : 'Create Formula'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
