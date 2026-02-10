@@ -570,7 +570,8 @@
                 allergen: 'Yes - Limonene, Linalool',
                 type: 'Natural',
                 strength: 7,
-                substantivity: 'Low'
+                substantivity: 'Low',
+                costPerGram: '0.45'
             },
             {
                 id: 'M002',
@@ -582,7 +583,8 @@
                 allergen: 'No',
                 type: 'Aromachemical',
                 strength: 5,
-                substantivity: 'Medium'
+                substantivity: 'Medium',
+                costPerGram: '0.12'
             },
             {
                 id: 'M003',
@@ -594,7 +596,8 @@
                 allergen: 'Yes - Santalol',
                 type: 'Natural',
                 strength: 9,
-                substantivity: 'High'
+                substantivity: 'High',
+                costPerGram: '2.85'
             }
         ];
 
@@ -603,9 +606,15 @@
                 id: 'F001',
                 name: 'Fresh Citrus Cologne',
                 createdDate: '2024-01-15',
-                ingredients: [
-                    { materialId: 'M001', materialName: 'Bergamot Essential Oil', amount: '30', dilution: '10' },
-                    { materialId: 'M002', materialName: 'Hedione', amount: '15', dilution: '20' }
+                trials: [
+                    {
+                        trialNumber: 1,
+                        date: '2024-01-15',
+                        ingredients: [
+                            { materialId: 'M001', materialName: 'Bergamot Essential Oil', amount: '30', dilution: '10' },
+                            { materialId: 'M002', materialName: 'Hedione', amount: '15', dilution: '20' }
+                        ]
+                    }
                 ]
             }
         ];
@@ -622,10 +631,19 @@
             const [sortBy, setSortBy] = useState('all');
             const [filterValue, setFilterValue] = useState('all');
             const [editingFormula, setEditingFormula] = useState(null);
+            const [editingTrial, setEditingTrial] = useState(null);
+            const [showTrialModal, setShowTrialModal] = useState(false);
+            const [currentFormula, setCurrentFormula] = useState(null);
 
             const [formulaForm, setFormulaForm] = useState({
                 name: '',
                 createdDate: new Date().toISOString().split('T')[0],
+                trials: []
+            });
+
+            const [trialForm, setTrialForm] = useState({
+                trialNumber: 1,
+                date: new Date().toISOString().split('T')[0],
                 ingredients: []
             });
 
@@ -638,7 +656,8 @@
                 allergen: '',
                 type: 'Natural',
                 strength: 5,
-                substantivity: 'Medium'
+                substantivity: 'Medium',
+                costPerGram: ''
             });
 
             // Load data from localStorage on mount
@@ -726,7 +745,8 @@
                         allergen: '',
                         type: 'Natural',
                         strength: 5,
-                        substantivity: 'Medium'
+                        substantivity: 'Medium',
+                        costPerGram: ''
                     });
                 }
                 setShowMaterialModal(true);
@@ -815,7 +835,7 @@
                     setFormulaForm({
                         name: '',
                         createdDate: new Date().toISOString().split('T')[0],
-                        ingredients: []
+                        trials: []
                     });
                 }
                 setShowFormulaModal(true);
@@ -824,11 +844,6 @@
             const saveFormula = () => {
                 if (!formulaForm.name) {
                     alert('Please enter a formula name');
-                    return;
-                }
-
-                if (formulaForm.ingredients.length === 0) {
-                    alert('Please add at least one ingredient');
                     return;
                 }
 
@@ -852,15 +867,74 @@
                 }
             };
 
+            // Trial Management Functions
+            const openTrialModal = (formula, trial = null) => {
+                setCurrentFormula(formula);
+                if (trial) {
+                    setEditingTrial(trial);
+                    setTrialForm(trial);
+                } else {
+                    setEditingTrial(null);
+                    const nextTrialNumber = formula.trials.length > 0 
+                        ? Math.max(...formula.trials.map(t => t.trialNumber)) + 1 
+                        : 1;
+                    setTrialForm({
+                        trialNumber: nextTrialNumber,
+                        date: new Date().toISOString().split('T')[0],
+                        ingredients: []
+                    });
+                }
+                setShowTrialModal(true);
+            };
+
+            const saveTrial = () => {
+                if (trialForm.ingredients.length === 0) {
+                    alert('Please add at least one ingredient');
+                    return;
+                }
+
+                const updatedFormulas = formulas.map(f => {
+                    if (f.id === currentFormula.id) {
+                        let updatedTrials;
+                        if (editingTrial) {
+                            updatedTrials = f.trials.map(t => 
+                                t.trialNumber === editingTrial.trialNumber ? trialForm : t
+                            );
+                        } else {
+                            updatedTrials = [...f.trials, trialForm];
+                        }
+                        return { ...f, trials: updatedTrials };
+                    }
+                    return f;
+                });
+
+                setFormulas(updatedFormulas);
+                showSuccess(editingTrial ? 'Trial updated successfully!' : 'Trial added successfully!');
+                setShowTrialModal(false);
+            };
+
+            const deleteTrial = (formula, trialNumber) => {
+                if (confirm('Are you sure you want to delete this trial?')) {
+                    const updatedFormulas = formulas.map(f => {
+                        if (f.id === formula.id) {
+                            return { ...f, trials: f.trials.filter(t => t.trialNumber !== trialNumber) };
+                        }
+                        return f;
+                    });
+                    setFormulas(updatedFormulas);
+                    showSuccess('Trial deleted successfully!');
+                }
+            };
+
             const addIngredient = () => {
-                setFormulaForm({
-                    ...formulaForm,
-                    ingredients: [...formulaForm.ingredients, { materialId: '', materialName: '', amount: '', dilution: '' }]
+                setTrialForm({
+                    ...trialForm,
+                    ingredients: [...trialForm.ingredients, { materialId: '', materialName: '', amount: '', dilution: '' }]
                 });
             };
 
             const updateIngredient = (index, field, value) => {
-                const updatedIngredients = [...formulaForm.ingredients];
+                const updatedIngredients = [...trialForm.ingredients];
                 updatedIngredients[index][field] = value;
                 
                 // Auto-populate material name when material ID is selected
@@ -871,16 +945,16 @@
                     }
                 }
                 
-                setFormulaForm({
-                    ...formulaForm,
+                setTrialForm({
+                    ...trialForm,
                     ingredients: updatedIngredients
                 });
             };
 
             const removeIngredient = (index) => {
-                setFormulaForm({
-                    ...formulaForm,
-                    ingredients: formulaForm.ingredients.filter((_, i) => i !== index)
+                setTrialForm({
+                    ...trialForm,
+                    ingredients: trialForm.ingredients.filter((_, i) => i !== index)
                 });
             };
 
@@ -1074,13 +1148,6 @@
                                     <button className="btn btn-accent" onClick={triggerImport}>
                                         ↑ Import Database
                                     </button>
-                                    <input 
-                                        id="file-import-input-formulas"
-                                        type="file" 
-                                        accept=".json"
-                                        onChange={importDatabase}
-                                        style={{display: 'none'}}
-                                    />
                                     <button className="btn btn-primary" onClick={() => openFormulaModal()}>
                                         + Add Formula
                                     </button>
@@ -1104,6 +1171,9 @@
                                             materials={materials}
                                             onEdit={() => openFormulaModal(formula)}
                                             onDelete={() => deleteFormula(formula.id)}
+                                            onAddTrial={openTrialModal}
+                                            onEditTrial={openTrialModal}
+                                            onDeleteTrial={deleteTrial}
                                         />
                                     ))}
                                 </div>
@@ -1112,10 +1182,96 @@
                     )}
 
                     {activeTab === 'calculator' && (
-                        <div className="empty-state">
-                            <h3>Cost Calculator</h3>
-                            <p>Select a formula to calculate material costs</p>
-                        </div>
+                        <>
+                            <div className="action-bar">
+                                <h2 style={{fontSize: '1.5rem', color: 'var(--primary-dark)'}}>Cost Calculator</h2>
+                            </div>
+
+                            {formulas.length === 0 ? (
+                                <div className="empty-state">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <h3>No formulas to calculate</h3>
+                                    <p>Create formulas in the Formulas tab to see cost breakdowns</p>
+                                </div>
+                            ) : (
+                                <div className="grid">
+                                    {formulas.map(formula => {
+                                        // Calculate costs for all trials
+                                        return formula.trials.map(trial => {
+                                            let totalCost = 0;
+                                            const ingredientCosts = trial.ingredients.map(ing => {
+                                                const material = materials.find(m => m.id === ing.materialId);
+                                                const amount = parseFloat(ing.amount) || 0;
+                                                const dilution = parseFloat(ing.dilution) || 100;
+                                                const costPerGram = parseFloat(material?.costPerGram) || 0;
+                                                
+                                                // Calculate actual amount used considering dilution
+                                                const actualAmount = amount * (dilution / 100);
+                                                const cost = actualAmount * costPerGram;
+                                                totalCost += cost;
+                                                
+                                                return {
+                                                    name: material?.name || ing.materialName || 'Unknown',
+                                                    amount,
+                                                    dilution,
+                                                    actualAmount,
+                                                    costPerGram,
+                                                    cost
+                                                };
+                                            });
+
+                                            const totalWeight = trial.ingredients.reduce((sum, ing) => 
+                                                sum + (parseFloat(ing.amount) || 0), 0
+                                            );
+
+                                            return (
+                                                <div key={`${formula.id}-${trial.trialNumber}`} className="card">
+                                                    <div className="card-header">
+                                                        <div>
+                                                            <div className="card-title">{formula.name} - Trial #{trial.trialNumber}</div>
+                                                            <div className="card-subtitle">{formula.id} • {trial.date}</div>
+                                                        </div>
+                                                        <div style={{textAlign: 'right'}}>
+                                                            <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--accent)'}}>
+                                                                ${totalCost.toFixed(2)}
+                                                            </div>
+                                                            <div style={{fontSize: '0.85rem', color: 'var(--text-mid)'}}>
+                                                                Total Cost
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="material-detail">
+                                                        <strong>Total Weight:</strong> {totalWeight.toFixed(2)}g
+                                                    </div>
+                                                    <div className="material-detail">
+                                                        <strong>Cost per Gram:</strong> ${totalWeight > 0 ? (totalCost / totalWeight).toFixed(2) : '0.00'}
+                                                    </div>
+
+                                                    <div style={{marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem'}}>
+                                                        <div style={{fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-dark)'}}>
+                                                            Cost Breakdown:
+                                                        </div>
+                                                        {ingredientCosts.map((ing, idx) => (
+                                                            <div key={idx} style={{fontSize: '0.9rem', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0'}}>
+                                                                <span style={{color: 'var(--text-mid)'}}>
+                                                                    {ing.name} ({ing.amount}g @ {ing.dilution}% = {ing.actualAmount.toFixed(2)}g actual)
+                                                                </span>
+                                                                <span style={{fontWeight: '600', color: 'var(--primary)'}}>
+                                                                    ${ing.cost.toFixed(2)}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        });
+                                    })}
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {activeTab === 'compliance' && (
@@ -1142,6 +1298,16 @@
                             onSave={saveFormula}
                             onClose={() => setShowFormulaModal(false)}
                             isEditing={!!editingFormula}
+                        />
+                    )}
+
+                    {showTrialModal && (
+                        <TrialModal
+                            trial={trialForm}
+                            onChange={setTrialForm}
+                            onSave={saveTrial}
+                            onClose={() => setShowTrialModal(false)}
+                            isEditing={!!editingTrial}
                             materials={materials}
                             addIngredient={addIngredient}
                             updateIngredient={updateIngredient}
@@ -1203,6 +1369,11 @@
                     <div className="material-detail">
                         <strong>Substantivity:</strong> {material.substantivity}
                     </div>
+                    {material.costPerGram && (
+                        <div className="material-detail">
+                            <strong>Cost per Gram:</strong> ${parseFloat(material.costPerGram).toFixed(2)}
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1294,6 +1465,18 @@
                                 />
                             </div>
 
+                            <div className="form-group">
+                                <label>Cost per Gram ($)</label>
+                                <input 
+                                    type="number" 
+                                    step="0.01"
+                                    min="0"
+                                    value={material.costPerGram}
+                                    onChange={(e) => handleChange('costPerGram', e.target.value)}
+                                    placeholder="e.g., 0.45"
+                                />
+                            </div>
+
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Strength (1-10) *</label>
@@ -1330,8 +1513,13 @@
             );
         }
 
-        function FormulaCard({ formula, materials, onEdit, onDelete }) {
-            const totalAmount = formula.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.amount) || 0), 0);
+        function FormulaCard({ formula, materials, onEdit, onDelete, onAddTrial, onEditTrial, onDeleteTrial }) {
+            const totalTrials = formula.trials.length;
+            const latestTrial = formula.trials.length > 0 
+                ? formula.trials.reduce((latest, trial) => 
+                    trial.trialNumber > latest.trialNumber ? trial : latest
+                  ) 
+                : null;
 
             return (
                 <div className="card">
@@ -1347,40 +1535,74 @@
                     </div>
 
                     <div className="material-detail">
-                        <strong>Total Weight:</strong> {totalAmount.toFixed(2)}g
-                    </div>
-                    <div className="material-detail">
-                        <strong>Ingredients:</strong> {formula.ingredients.length} materials
+                        <strong>Total Trials:</strong> {totalTrials}
                     </div>
 
                     <div style={{marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem'}}>
-                        {formula.ingredients.slice(0, 3).map((ing, idx) => {
-                            const material = materials.find(m => m.id === ing.materialId);
-                            return (
-                                <div key={idx} style={{fontSize: '0.9rem', color: 'var(--text-mid)', marginBottom: '0.25rem'}}>
-                                    • {material?.name || ing.materialName || 'Unknown'} - {ing.amount}g
-                                    {ing.dilution && ` (${ing.dilution}% dilution)`}
-                                </div>
-                            );
-                        })}
-                        {formula.ingredients.length > 3 && (
-                            <div style={{fontSize: '0.9rem', color: 'var(--text-light)', fontStyle: 'italic'}}>
-                                +{formula.ingredients.length - 3} more...
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem'}}>
+                            <strong style={{color: 'var(--text-dark)'}}>Trials:</strong>
+                            <button 
+                                className="btn btn-small btn-accent" 
+                                onClick={() => onAddTrial(formula)}
+                            >
+                                + Add Trial
+                            </button>
+                        </div>
+                        
+                        {formula.trials.length === 0 ? (
+                            <div style={{textAlign: 'center', padding: '1rem', color: 'var(--text-light)', fontSize: '0.9rem'}}>
+                                No trials yet
                             </div>
+                        ) : (
+                            formula.trials.map((trial) => {
+                                const totalAmount = trial.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.amount) || 0), 0);
+                                return (
+                                    <div key={trial.trialNumber} style={{
+                                        background: 'var(--bg-main)', 
+                                        padding: '0.75rem', 
+                                        borderRadius: '6px', 
+                                        marginBottom: '0.5rem',
+                                        border: '1px solid var(--border)'
+                                    }}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
+                                            <strong style={{color: 'var(--primary)'}}>Trial #{trial.trialNumber}</strong>
+                                            <div style={{display: 'flex', gap: '0.25rem'}}>
+                                                <button 
+                                                    className="btn btn-small btn-secondary"
+                                                    onClick={() => onEditTrial(formula, trial)}
+                                                    style={{padding: '0.25rem 0.5rem', fontSize: '0.75rem'}}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button 
+                                                    className="btn btn-small btn-secondary"
+                                                    onClick={() => onDeleteTrial(formula, trial.trialNumber)}
+                                                    style={{padding: '0.25rem 0.5rem', fontSize: '0.75rem'}}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div style={{fontSize: '0.85rem', color: 'var(--text-mid)'}}>
+                                            Date: {trial.date} • {trial.ingredients.length} ingredients • {totalAmount.toFixed(2)}g total
+                                        </div>
+                                    </div>
+                                );
+                            })
                         )}
                     </div>
                 </div>
             );
         }
 
-        function FormulaModal({ formula, onChange, onSave, onClose, isEditing, materials, addIngredient, updateIngredient, removeIngredient }) {
+        function FormulaModal({ formula, onChange, onSave, onClose, isEditing }) {
             const handleChange = (field, value) => {
                 onChange({ ...formula, [field]: value });
             };
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '800px'}}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>{isEditing ? 'Edit Formula' : 'Create New Formula'}</h2>
                         </div>
@@ -1404,6 +1626,52 @@
                                     />
                                 </div>
                             </div>
+                            <p style={{color: 'var(--text-mid)', fontSize: '0.95rem', marginTop: '1rem'}}>
+                                After creating the formula, you can add trials with ingredients.
+                            </p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                            <button className="btn btn-primary" onClick={onSave}>
+                                {isEditing ? 'Update Formula' : 'Create Formula'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function TrialModal({ trial, onChange, onSave, onClose, isEditing, materials, addIngredient, updateIngredient, removeIngredient }) {
+            const handleChange = (field, value) => {
+                onChange({ ...trial, [field]: value });
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '800px'}}>
+                        <div className="modal-header">
+                            <h2>{isEditing ? `Edit Trial #${trial.trialNumber}` : 'Create New Trial'}</h2>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Trial Number</label>
+                                    <input 
+                                        type="number" 
+                                        value={trial.trialNumber}
+                                        onChange={(e) => handleChange('trialNumber', parseInt(e.target.value))}
+                                        min="1"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Date</label>
+                                    <input 
+                                        type="date" 
+                                        value={trial.date}
+                                        onChange={(e) => handleChange('date', e.target.value)}
+                                    />
+                                </div>
+                            </div>
 
                             <div className="form-group">
                                 <label style={{marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -1417,7 +1685,7 @@
                                     </button>
                                 </label>
 
-                                {formula.ingredients.length === 0 ? (
+                                {trial.ingredients.length === 0 ? (
                                     <div style={{textAlign: 'center', padding: '2rem', color: 'var(--text-light)', border: '2px dashed var(--border)', borderRadius: '8px'}}>
                                         No ingredients added yet. Click "Add Ingredient" to start.
                                     </div>
@@ -1433,7 +1701,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {formula.ingredients.map((ingredient, index) => (
+                                                {trial.ingredients.map((ingredient, index) => (
                                                     <tr key={index}>
                                                         <td style={{padding: '0.5rem'}}>
                                                             <select
@@ -1483,7 +1751,7 @@
                                             </tbody>
                                         </table>
                                         <div style={{marginTop: '1rem', padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '4px', fontWeight: '600'}}>
-                                            Total: {formula.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.amount) || 0), 0).toFixed(2)}g
+                                            Total: {trial.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.amount) || 0), 0).toFixed(2)}g
                                         </div>
                                     </div>
                                 )}
@@ -1492,7 +1760,7 @@
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
                             <button className="btn btn-primary" onClick={onSave}>
-                                {isEditing ? 'Update Formula' : 'Create Formula'}
+                                {isEditing ? 'Update Trial' : 'Create Trial'}
                             </button>
                         </div>
                     </div>

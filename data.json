@@ -2,7 +2,7 @@
   "materials": [
     {
       "id": "M001",
-      "name": "Begamont eo",
+      "name": "Bergamot Essential Oil",
       "casNumber": "8007-75-8",
       "category": "Citrus",
       "scentProfile": "Fresh, Citrus, Sweet",
@@ -10,11 +10,13 @@
       "allergen": "Yes - Limonene, Linalool",
       "type": "Natural",
       "strength": 7,
-      "substantivity": "Low"
+      "substantivity": "Low",
+      "costPerGram": "0.45",
+      "ifraLimit": "0.4"
     },
     {
       "id": "M002",
-      "name": "Hedione",
+      "name": "Hedione (Methyl Dihydrojasmonate)",
       "casNumber": "24851-98-7",
       "category": "Floral",
       "scentProfile": "Jasmine, Green, Fresh",
@@ -22,7 +24,9 @@
       "allergen": "No",
       "type": "Aromachemical",
       "strength": 5,
-      "substantivity": "Medium"
+      "substantivity": "Medium",
+      "costPerGram": "0.12",
+      "ifraLimit": "50"
     },
     {
       "id": "M003",
@@ -34,39 +38,263 @@
       "allergen": "Yes - Santalol",
       "type": "Natural",
       "strength": 9,
-      "substantivity": "High"
+      "substantivity": "High",
+      "costPerGram": "2.85",
+      "ifraLimit": "100"
     },
     {
-      "name": "ISO -aa sf",
-      "casNumber": "23r",
-      "category": "13r",
-      "scentProfile": "fasdf",
-      "position": "Base",
-      "allergen": "asdf",
+      "id": "M004",
+      "name": "Linalool (Natural)",
+      "casNumber": "78-70-6",
+      "category": "Floral",
+      "scentProfile": "Floral, Woody, Lavender",
+      "position": "Heart",
+      "allergen": "Yes - Linalool",
       "type": "Natural",
-      "strength": 5,
+      "strength": 6,
+      "substantivity": "Medium",
+      "costPerGram": "0.35",
+      "ifraLimit": "100"
+    },
+    {
+      "id": "M005",
+      "name": "ISO E Super",
+      "casNumber": "54464-57-2",
+      "category": "Woody",
+      "scentProfile": "Woody, Amber, Velvety",
+      "position": "Base",
+      "allergen": "No",
+      "type": "Aromachemical",
+      "strength": 3,
+      "substantivity": "Very High",
+      "costPerGram": "0.08",
+      "ifraLimit": "21.4"
+    },
+    {
+      "id": "M006",
+      "name": "Lemon Essential Oil",
+      "casNumber": "8008-56-8",
+      "category": "Citrus",
+      "scentProfile": "Zesty, Bright, Fresh",
+      "position": "Top",
+      "allergen": "Yes - Limonene, Citral",
+      "type": "Natural",
+      "strength": 8,
+      "substantivity": "Low",
+      "costPerGram": "0.25",
+      "ifraLimit": "2"
+    },
+    {
+      "id": "M007",
+      "name": "Cedarwood Virginia",
+      "casNumber": "8000-27-9",
+      "category": "Woody",
+      "scentProfile": "Dry, Woody, Pencil Shavings",
+      "position": "Base",
+      "allergen": "No",
+      "type": "Natural",
+      "strength": 6,
       "substantivity": "High",
-      "id": "M004"
+      "costPerGram": "0.18",
+      "ifraLimit": "100"
+    },
+    {
+      "id": "M008",
+      "name": "Geranium Oil (Egypt)",
+      "casNumber": "8000-46-2",
+      "category": "Floral",
+      "scentProfile": "Rose-like, Green, Minty",
+      "position": "Heart",
+      "allergen": "Yes - Geraniol, Citronellol",
+      "type": "Natural",
+      "strength": 7,
+      "substantivity": "Medium",
+      "costPerGram": "0.95",
+      "ifraLimit": "100"
+    },
+    {
+      "id": "M009",
+      "name": "Ambroxan",
+      "casNumber": "6790-58-5",
+      "category": "Amber",
+      "scentProfile": "Amber, Marine, Musky",
+      "position": "Base",
+      "allergen": "No",
+      "type": "Aromachemical",
+      "strength": 4,
+      "substantivity": "Very High",
+      "costPerGram": "0.45",
+      "ifraLimit": "100"
+    },
+    {
+      "id": "M010",
+      "name": "Benzyl Acetate",
+      "casNumber": "140-11-4",
+      "category": "Floral",
+      "scentProfile": "Jasmine, Fruity, Sweet",
+      "position": "Heart",
+      "allergen": "No",
+      "type": "Aromachemical",
+      "strength": 6,
+      "substantivity": "Medium",
+      "costPerGram": "0.15",
+      "ifraLimit": "100"
     }
   ],
   "formulas": [
     {
       "id": "F001",
-      "name": "Formula 1",
-      "type": "Eau de Cologne",
-      "status": "Active",
-      "ingredients": [
+      "name": "Fresh Citrus Cologne",
+      "createdDate": "2024-01-15",
+      "trials": [
         {
-          "materialId": "M001",
-          "weight": 30
+          "trialNumber": 1,
+          "date": "2024-01-15",
+          "ingredients": [
+            {
+              "materialId": "M001",
+              "materialName": "Bergamot Essential Oil",
+              "amount": "30",
+              "dilution": "10"
+            },
+            {
+              "materialId": "M002",
+              "materialName": "Hedione",
+              "amount": "15",
+              "dilution": "20"
+            },
+            {
+              "materialId": "M004",
+              "materialName": "Linalool",
+              "amount": "10",
+              "dilution": "15"
+            }
+          ]
         },
         {
-          "materialId": "M002",
-          "weight": 15
+          "trialNumber": 2,
+          "date": "2024-02-01",
+          "ingredients": [
+            {
+              "materialId": "M001",
+              "materialName": "Bergamot Essential Oil",
+              "amount": "35",
+              "dilution": "12"
+            },
+            {
+              "materialId": "M002",
+              "materialName": "Hedione",
+              "amount": "20",
+              "dilution": "25"
+            },
+            {
+              "materialId": "M006",
+              "materialName": "Lemon Essential Oil",
+              "amount": "8",
+              "dilution": "8"
+            }
+          ]
         }
-      ],
-      "createdDate": "2026-02-08"
+      ]
+    },
+    {
+      "id": "F002",
+      "name": "Woody Amber Base",
+      "createdDate": "2023-12-10",
+      "trials": [
+        {
+          "trialNumber": 1,
+          "date": "2023-12-10",
+          "ingredients": [
+            {
+              "materialId": "M003",
+              "materialName": "Sandalwood Oil",
+              "amount": "25",
+              "dilution": "30"
+            },
+            {
+              "materialId": "M009",
+              "materialName": "Ambroxan",
+              "amount": "15",
+              "dilution": "50"
+            },
+            {
+              "materialId": "M005",
+              "materialName": "ISO E Super",
+              "amount": "20",
+              "dilution": "40"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F003",
+      "name": "Modern Floral",
+      "createdDate": "2024-02-05",
+      "trials": [
+        {
+          "trialNumber": 1,
+          "date": "2024-02-05",
+          "ingredients": [
+            {
+              "materialId": "M002",
+              "materialName": "Hedione",
+              "amount": "40",
+              "dilution": "25"
+            },
+            {
+              "materialId": "M008",
+              "materialName": "Geranium Oil",
+              "amount": "12",
+              "dilution": "15"
+            },
+            {
+              "materialId": "M010",
+              "materialName": "Benzyl Acetate",
+              "amount": "18",
+              "dilution": "20"
+            },
+            {
+              "materialId": "M007",
+              "materialName": "Cedarwood Virginia",
+              "amount": "10",
+              "dilution": "18"
+            }
+          ]
+        },
+        {
+          "trialNumber": 2,
+          "date": "2024-02-08",
+          "ingredients": [
+            {
+              "materialId": "M002",
+              "materialName": "Hedione",
+              "amount": "45",
+              "dilution": "30"
+            },
+            {
+              "materialId": "M008",
+              "materialName": "Geranium Oil",
+              "amount": "15",
+              "dilution": "18"
+            },
+            {
+              "materialId": "M010",
+              "materialName": "Benzyl Acetate",
+              "amount": "20",
+              "dilution": "22"
+            },
+            {
+              "materialId": "M007",
+              "materialName": "Cedarwood Virginia",
+              "amount": "8",
+              "dilution": "15"
+            }
+          ]
+        }
+      ]
     }
   ],
-  "exportDate": "2026-02-09T06:36:48.183Z"
+  "exportDate": "2024-02-09T00:00:00.000Z"
 }
