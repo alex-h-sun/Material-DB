@@ -657,7 +657,9 @@
                 type: 'Natural',
                 strength: 5,
                 substantivity: 'Medium',
-                costPerGram: ''
+                costPerGram: '',
+                ifraLimit: '',
+                notes: ''
             });
 
             // Load data from localStorage on mount
@@ -694,6 +696,22 @@
                     localStorage.setItem('fragranceFormulas', JSON.stringify(formulas));
                 }
             }, [formulas]);
+
+            // Listen for notes updates from MaterialCard
+            useEffect(() => {
+                const handleNotesUpdate = (event) => {
+                    const { materialId, notes } = event.detail;
+                    setMaterials(prevMaterials => 
+                        prevMaterials.map(m => 
+                            m.id === materialId ? { ...m, notes } : m
+                        )
+                    );
+                    showSuccess('Notes updated successfully!');
+                };
+
+                window.addEventListener('updateMaterialNotes', handleNotesUpdate);
+                return () => window.removeEventListener('updateMaterialNotes', handleNotesUpdate);
+            }, []);
 
             const showSuccess = (message) => {
                 setSuccessMessage(message);
@@ -746,7 +764,9 @@
                         type: 'Natural',
                         strength: 5,
                         substantivity: 'Medium',
-                        costPerGram: ''
+                        costPerGram: '',
+                        ifraLimit: '',
+                        notes: ''
                     });
                 }
                 setShowMaterialModal(true);
@@ -1352,6 +1372,9 @@
         }
 
         function MaterialCard({ material, onEdit, onDelete }) {
+            const [showNotesModal, setShowNotesModal] = React.useState(false);
+            const [notesDraft, setNotesDraft] = React.useState('');
+
             const getPositionBadge = (pos) => {
                 const classes = {
                     'Top': 'badge-top',
@@ -1365,49 +1388,106 @@
                 return type === 'Natural' ? 'badge-natural' : 'badge-synthetic';
             };
 
+            const openNotesModal = () => {
+                setNotesDraft(material.notes || '');
+                setShowNotesModal(true);
+            };
+
+            const saveNotes = () => {
+                // Update material with new notes
+                const event = new CustomEvent('updateMaterialNotes', {
+                    detail: { materialId: material.id, notes: notesDraft }
+                });
+                window.dispatchEvent(event);
+                setShowNotesModal(false);
+            };
+
             return (
-                <div className="card">
-                    <div className="card-header">
-                        <div>
-                            <div className="card-title">{material.name}</div>
-                            <div className="card-subtitle">{material.id} • CAS {material.casNumber}</div>
+                <>
+                    <div className="card">
+                        <div className="card-header">
+                            <div>
+                                <div className="card-title">{material.name}</div>
+                                <div className="card-subtitle">{material.id} • CAS {material.casNumber}</div>
+                            </div>
+                            <div className="card-actions">
+                                <button className="btn btn-small btn-secondary" onClick={onEdit}>Edit</button>
+                                <button className="btn btn-small btn-secondary" onClick={onDelete}>×</button>
+                            </div>
                         </div>
-                        <div className="card-actions">
-                            <button className="btn btn-small btn-secondary" onClick={onEdit}>Edit</button>
-                            <button className="btn btn-small btn-secondary" onClick={onDelete}>×</button>
-                        </div>
-                    </div>
 
-                    <div style={{marginBottom: '1rem'}}>
-                        <span className={getTypeBadge(material.type)}>{material.type}</span>
-                        {' '}
-                        <span className={getPositionBadge(material.position)}>{material.position} Note</span>
-                    </div>
-
-                    <div className="material-detail">
-                        <strong>Category:</strong> {material.category}
-                    </div>
-                    <div className="material-detail">
-                        <strong>Scent Profile:</strong> {material.scentProfile}
-                    </div>
-                    <div className="material-detail">
-                        <strong>Allergen:</strong> {material.allergen}
-                    </div>
-                    <div className="material-detail">
-                        <strong>Strength:</strong> {material.strength}/10
-                        <div className="strength-bar">
-                            <div className="strength-fill" style={{width: `${material.strength * 10}%`}}></div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.5rem'}}>
+                            <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1}}>
+                                <span className={getTypeBadge(material.type)}>{material.type}</span>
+                                <span className={getPositionBadge(material.position)}>{material.position} Note</span>
+                            </div>
+                            <div style={{display: 'flex', gap: '0.5rem'}}>
+                                <button 
+                                    className="btn btn-small btn-accent"
+                                    onClick={openNotesModal}
+                                    style={{padding: '0.4rem 0.8rem', fontSize: '0.85rem'}}
+                                >
+                                    📝 Notes
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div className="material-detail">
-                        <strong>Substantivity:</strong> {material.substantivity}
-                    </div>
-                    {material.costPerGram && (
+
                         <div className="material-detail">
-                            <strong>Cost per Gram:</strong> ${parseFloat(material.costPerGram).toFixed(2)}
+                            <strong>Category:</strong> {material.category}
+                        </div>
+                        <div className="material-detail">
+                            <strong>Scent Profile:</strong> {material.scentProfile}
+                        </div>
+                        <div className="material-detail">
+                            <strong>Allergen:</strong> {material.allergen}
+                        </div>
+                        <div className="material-detail">
+                            <strong>Strength:</strong> {material.strength}/10
+                            <div className="strength-bar">
+                                <div className="strength-fill" style={{width: `${material.strength * 10}%`}}></div>
+                            </div>
+                        </div>
+                        <div className="material-detail">
+                            <strong>Substantivity:</strong> {material.substantivity}
+                        </div>
+                        {material.costPerGram && (
+                            <div className="material-detail">
+                                <strong>Cost per Gram:</strong> ${parseFloat(material.costPerGram).toFixed(2)}
+                            </div>
+                        )}
+                    </div>
+
+                    {showNotesModal && (
+                        <div className="modal-overlay" onClick={() => setShowNotesModal(false)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>Notes: {material.name}</h2>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="form-group">
+                                        <label>Notes</label>
+                                        <textarea 
+                                            value={notesDraft}
+                                            onChange={(e) => setNotesDraft(e.target.value)}
+                                            placeholder="Add any notes about this material (supplier info, blending observations, storage notes, etc.)"
+                                            rows="10"
+                                            style={{minHeight: '200px'}}
+                                        />
+                                    </div>
+                                    <div style={{fontSize: '0.85rem', color: 'var(--text-mid)', marginTop: '0.5rem'}}>
+                                        Character count: {notesDraft.length}
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="btn btn-secondary" onClick={() => setShowNotesModal(false)}>Cancel</button>
+                                    <button className="btn btn-primary" onClick={saveNotes}>
+                                        Save Notes
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
-                </div>
+                </>
             );
         }
 
@@ -1533,6 +1613,16 @@
                                         <option value="Very High">Very High</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Notes</label>
+                                <textarea 
+                                    value={material.notes || ''}
+                                    onChange={(e) => handleChange('notes', e.target.value)}
+                                    placeholder="Add any additional notes about this material (supplier info, blending notes, personal observations, etc.)"
+                                    rows="4"
+                                />
                             </div>
                         </div>
                         <div className="modal-footer">
