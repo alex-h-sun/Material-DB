@@ -1197,78 +1197,111 @@
                                 </div>
                             ) : (
                                 <div className="grid">
-                                    {formulas.map(formula => {
-                                        // Calculate costs for all trials
-                                        return formula.trials.map(trial => {
-                                            let totalCost = 0;
-                                            const ingredientCosts = trial.ingredients.map(ing => {
-                                                const material = materials.find(m => m.id === ing.materialId);
-                                                const amount = parseFloat(ing.amount) || 0;
-                                                const dilution = parseFloat(ing.dilution) || 100;
-                                                const costPerGram = parseFloat(material?.costPerGram) || 0;
-                                                
-                                                // Calculate actual amount used considering dilution
-                                                const actualAmount = amount * (dilution / 100);
-                                                const cost = actualAmount * costPerGram;
-                                                totalCost += cost;
-                                                
-                                                return {
-                                                    name: material?.name || ing.materialName || 'Unknown',
-                                                    amount,
-                                                    dilution,
-                                                    actualAmount,
-                                                    costPerGram,
-                                                    cost
-                                                };
-                                            });
-
-                                            const totalWeight = trial.ingredients.reduce((sum, ing) => 
-                                                sum + (parseFloat(ing.amount) || 0), 0
-                                            );
-
-                                            return (
-                                                <div key={`${formula.id}-${trial.trialNumber}`} className="card">
-                                                    <div className="card-header">
-                                                        <div>
-                                                            <div className="card-title">{formula.name} - Trial #{trial.trialNumber}</div>
-                                                            <div className="card-subtitle">{formula.id} • {trial.date}</div>
-                                                        </div>
-                                                        <div style={{textAlign: 'right'}}>
-                                                            <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--accent)'}}>
-                                                                ${totalCost.toFixed(2)}
-                                                            </div>
-                                                            <div style={{fontSize: '0.85rem', color: 'var(--text-mid)'}}>
-                                                                Total Cost
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="material-detail">
-                                                        <strong>Total Weight:</strong> {totalWeight.toFixed(2)}g
-                                                    </div>
-                                                    <div className="material-detail">
-                                                        <strong>Cost per Gram:</strong> ${totalWeight > 0 ? (totalCost / totalWeight).toFixed(2) : '0.00'}
-                                                    </div>
-
-                                                    <div style={{marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem'}}>
-                                                        <div style={{fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-dark)'}}>
-                                                            Cost Breakdown:
-                                                        </div>
-                                                        {ingredientCosts.map((ing, idx) => (
-                                                            <div key={idx} style={{fontSize: '0.9rem', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0'}}>
-                                                                <span style={{color: 'var(--text-mid)'}}>
-                                                                    {ing.name} ({ing.amount}g @ {ing.dilution}% = {ing.actualAmount.toFixed(2)}g actual)
-                                                                </span>
-                                                                <span style={{fontWeight: '600', color: 'var(--primary)'}}>
-                                                                    ${ing.cost.toFixed(2)}
-                                                                </span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                    {formulas.map(formula => (
+                                        <div key={formula.id} className="card">
+                                            <div className="card-header">
+                                                <div>
+                                                    <div className="card-title">{formula.name}</div>
+                                                    <div className="card-subtitle">{formula.id} • Created {formula.createdDate}</div>
                                                 </div>
-                                            );
-                                        });
-                                    })}
+                                            </div>
+
+                                            <div className="material-detail">
+                                                <strong>Total Trials:</strong> {formula.trials.length}
+                                            </div>
+
+                                            <div style={{marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem'}}>
+                                                <strong style={{color: 'var(--text-dark)', marginBottom: '0.75rem', display: 'block'}}>Trial Costs:</strong>
+                                                
+                                                {formula.trials.length === 0 ? (
+                                                    <div style={{textAlign: 'center', padding: '1rem', color: 'var(--text-light)', fontSize: '0.9rem'}}>
+                                                        No trials to calculate
+                                                    </div>
+                                                ) : (
+                                                    formula.trials.map((trial) => {
+                                                        let totalCost = 0;
+                                                        const ingredientCosts = trial.ingredients.map(ing => {
+                                                            const material = materials.find(m => m.id === ing.materialId);
+                                                            const amount = parseFloat(ing.amount) || 0;
+                                                            const dilution = parseFloat(ing.dilution) || 100;
+                                                            const costPerGram = parseFloat(material?.costPerGram) || 0;
+                                                            
+                                                            const actualAmount = amount * (dilution / 100);
+                                                            const cost = actualAmount * costPerGram;
+                                                            totalCost += cost;
+                                                            
+                                                            return {
+                                                                name: material?.name || ing.materialName || 'Unknown',
+                                                                amount,
+                                                                dilution,
+                                                                actualAmount,
+                                                                costPerGram,
+                                                                cost
+                                                            };
+                                                        });
+
+                                                        const totalWeight = trial.ingredients.reduce((sum, ing) => 
+                                                            sum + (parseFloat(ing.amount) || 0), 0
+                                                        );
+
+                                                        return (
+                                                            <div key={trial.trialNumber} style={{
+                                                                background: 'var(--bg-main)', 
+                                                                padding: '1rem', 
+                                                                borderRadius: '6px', 
+                                                                marginBottom: '0.75rem',
+                                                                border: '1px solid var(--border)'
+                                                            }}>
+                                                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem'}}>
+                                                                    <div>
+                                                                        <strong style={{color: 'var(--primary)', fontSize: '1.1rem'}}>Trial #{trial.trialNumber}</strong>
+                                                                        <div style={{fontSize: '0.85rem', color: 'var(--text-mid)', marginTop: '0.25rem'}}>
+                                                                            {trial.date}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style={{textAlign: 'right'}}>
+                                                                        <div style={{fontSize: '1.3rem', fontWeight: '700', color: 'var(--accent)'}}>
+                                                                            ${totalCost.toFixed(2)}
+                                                                        </div>
+                                                                        <div style={{fontSize: '0.75rem', color: 'var(--text-mid)'}}>
+                                                                            Total Cost
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div style={{fontSize: '0.9rem', color: 'var(--text-mid)', marginBottom: '0.75rem'}}>
+                                                                    <strong>Weight:</strong> {totalWeight.toFixed(2)}g • 
+                                                                    <strong> Cost/g:</strong> ${totalWeight > 0 ? (totalCost / totalWeight).toFixed(2) : '0.00'}
+                                                                </div>
+
+                                                                <div style={{borderTop: '1px solid var(--border)', paddingTop: '0.75rem'}}>
+                                                                    <div style={{fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-dark)'}}>
+                                                                        Ingredient Breakdown:
+                                                                    </div>
+                                                                    {ingredientCosts.map((ing, idx) => (
+                                                                        <div key={idx} style={{
+                                                                            fontSize: '0.85rem', 
+                                                                            marginBottom: '0.4rem', 
+                                                                            display: 'flex', 
+                                                                            justifyContent: 'space-between',
+                                                                            padding: '0.25rem 0'
+                                                                        }}>
+                                                                            <span style={{color: 'var(--text-mid)'}}>
+                                                                                {ing.name} ({ing.amount}g @ {ing.dilution}%)
+                                                                            </span>
+                                                                            <span style={{fontWeight: '600', color: 'var(--primary)'}}>
+                                                                                ${ing.cost.toFixed(2)}
+                                                                            </span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </>
